@@ -24,31 +24,42 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         context = this;
 
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) //telephone supérieur à android 5.1
+        {
             permissions = new ArrayList<>();
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
             permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-
+            permissions.add(Manifest.permission.SEND_SMS);
+            //appelle la méthode permission
             callPermissions();
         } else {
-            callIntent();
+            Intent intent = new Intent(context, MapsActivity.class);
+            startActivity(intent);
         }
     }
 
     private void callPermissions() {
         permissionsRequest = new ArrayList<>();
 
-        for (String permissionDemande : permissions) {
-            if (ContextCompat.checkSelfPermission(context, permissionDemande) != PackageManager.PERMISSION_GRANTED) {
+        for (int i = 0; i < permissions.size(); i++) {
+            String permissionDemande = permissions.get(i).toString();
+
+            if (ContextCompat.checkSelfPermission(context, permissionDemande)
+                    != PackageManager.PERMISSION_GRANTED) {
+
                 permissionsRequest.add(permissionDemande);
             }
         }
 
-        if (!permissionsRequest.isEmpty()) {
-            callIntent();
-        } else {
+        if (permissionsRequest.isEmpty()) //toutes les permissions ont été approuvées
+        {
+            Intent intent = new Intent(context, MapsActivity.class);
+            startActivity(intent);
+        } else //demande l'acceptation des permissions
+        {
             String[] request = new String[permissionsRequest.size()];
             request = permissionsRequest.toArray(request);
             ActivityCompat.requestPermissions(this, request, 100);
@@ -57,12 +68,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        callIntent();
-    }
 
-    private void callIntent() {
+        /*switch (requestCode) {
+            case 100: {
+                //utilisation spécifique en fonction de l'application
+            }
+            break;
+        }*/
+
         Intent intent = new Intent(context, MapsActivity.class);
         startActivity(intent);
+
     }
 }
